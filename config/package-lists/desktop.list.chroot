@@ -6,6 +6,8 @@ live-config-systemd
 # ── GNOME-desktop (Apple-achtige look via WhiteSur + Dash-to-Dock) ─
 gnome-core
 gdm3
+xorg
+gnome-session
 gnome-terminal
 gnome-tweaks
 gnome-shell-extension-manager
@@ -23,6 +25,15 @@ fonts-noto-color-emoji
 fonts-firacode
 papirus-icon-theme
 gnome-themes-extra
+
+# ── Login-manager met animatie-thema (SDDM i.p.v. GDM) ────────────
+sddm
+qml-module-qtquick2
+qml-module-qtquick-window2
+
+# ── Installatieprogramma (OS op de schijf zetten) ─────────────────
+calamares
+calamares-settings-debian
 
 # ── Hulpmiddelen ──────────────────────────────────────────────────
 gparted

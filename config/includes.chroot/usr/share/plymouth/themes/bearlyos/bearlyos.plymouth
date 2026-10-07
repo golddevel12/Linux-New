@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=BearlyOS
+Description=Bearly-IT opstartscherm
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/bearlyos
+ScriptFile=/usr/share/plymouth/themes/bearlyos/bearlyos.script

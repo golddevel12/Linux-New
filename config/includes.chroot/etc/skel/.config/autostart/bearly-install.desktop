@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=BearlyOS installeren
+Comment=Start het installatieprogramma in de live-sessie
+Exec=/usr/local/bin/bearly-live-install
+Icon=calamares
+Terminal=false
+X-GNOME-Autostart-enabled=true
+NoDisplay=true

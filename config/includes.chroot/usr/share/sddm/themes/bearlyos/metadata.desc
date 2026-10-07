@@ -1,0 +1,12 @@
+[SddmGreeterTheme]
+Name=BearlyOS
+Description=Bearly-IT animated login
+Author=Bearly IT
+License=MIT
+Type=image
+Version=1.0
+Website=https://github.com/golddevel12/Linux-New
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=bearlyos
+Theme-API=2.0

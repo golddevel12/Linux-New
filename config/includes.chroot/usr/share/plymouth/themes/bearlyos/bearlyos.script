@@ -1,0 +1,54 @@
+# BearlyOS opstartscherm: logo gecentreerd + amber laadbalk.
+
+Window.SetBackgroundTopColor(0.027, 0.027, 0.031);
+Window.SetBackgroundBottomColor(0.027, 0.027, 0.031);
+
+sw = Window.GetWidth();
+sh = Window.GetHeight();
+
+# ---- Logo (schaal naar ~42% schermbreedte) ----
+logo.orig = Image("logo.png");
+logo.w = sw * 0.42;
+logo.h = logo.w * logo.orig.GetHeight() / logo.orig.GetWidth();
+logo.img = logo.orig.Scale(logo.w, logo.h);
+logo.sprite = Sprite(logo.img);
+logo.sprite.SetX(sw / 2 - logo.w / 2);
+logo.sprite.SetY(sh / 2 - logo.h / 2 - sh * 0.04);
+logo.sprite.SetZ(10);
+
+# ---- Laadbalk ----
+bar.w = sw * 0.22;
+bar.h = 3;
+bar.x = sw / 2 - bar.w / 2;
+bar.y = sh * 0.72;
+
+track.img = Image("track.png").Scale(bar.w, bar.h);
+track.sprite = Sprite(track.img);
+track.sprite.SetX(bar.x);
+track.sprite.SetY(bar.y);
+track.sprite.SetZ(5);
+
+fill.sprite = Sprite();
+fill.sprite.SetX(bar.x);
+fill.sprite.SetY(bar.y);
+fill.sprite.SetZ(6);
+
+fun progress_cb(duration, progress){
+  w = bar.w * progress;
+  if (w < 1) w = 1;
+  fill.sprite.SetImage(Image("amber.png").Scale(w, bar.h));
+}
+Plymouth.SetBootProgressFunction(progress_cb);
+
+# ---- Wachtwoordprompt (bijv. versleutelde schijf) ----
+fun display_password_cb(prompt, bullets){
+  track.sprite.SetOpacity(0);
+  fill.sprite.SetOpacity(0);
+}
+Plymouth.SetDisplayPasswordFunction(display_password_cb);
+
+fun display_normal_cb(){
+  track.sprite.SetOpacity(1);
+  fill.sprite.SetOpacity(1);
+}
+Plymouth.SetDisplayNormalFunction(display_normal_cb);

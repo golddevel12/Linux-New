@@ -1,0 +1,25 @@
+#!/bin/sh
+# Installatieprogramma (Calamares): Bearly-IT-branding + autostart klaarzetten.
+set -e
+echo "I: Installatieprogramma voorbereiden..."
+
+chmod +x /usr/local/bin/bearly-live-install 2>/dev/null || true
+
+# Herbrand de werkende Debian-branding naar BearlyOS (veiliger dan een
+# compleet nieuwe branding-component die het installatieprogramma kan breken).
+BD=/etc/calamares/branding/debian
+if [ -f "$BD/branding.desc" ]; then
+    cp -f /etc/calamares/branding/bearlyos/logo.png "$BD/" 2>/dev/null || true
+    sed -i \
+        -e 's/\( *productName:\).*/\1 BearlyOS/' \
+        -e 's/\( *shortProductName:\).*/\1 BearlyOS/' \
+        -e 's/\( *versionedName:\).*/\1 BearlyOS 1.0/' \
+        -e 's/\( *shortVersionedName:\).*/\1 BearlyOS/' \
+        -e 's/\( *bootloaderEntryName:\).*/\1 BearlyOS/' \
+        "$BD/branding.desc" 2>/dev/null || echo "W: branding-tekst niet aangepast."
+    # Zijbalk-accent amber
+    sed -i 's/sidebarTextSelect:.*/sidebarTextSelect: "#F4A63B"/' "$BD/branding.desc" 2>/dev/null || true
+    echo "I: Calamares herbrand naar BearlyOS."
+else
+    echo "W: Debian-branding niet gevonden - installatieprogramma houdt standaardnaam."
+fi

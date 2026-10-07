@@ -1,0 +1,16 @@
+#!/bin/sh
+# Maakt SDDM (met ons animatie-thema) de standaard login-manager i.p.v. GDM.
+set -e
+echo "I: SDDM instellen als login-manager..."
+
+if [ -x /usr/bin/sddm ]; then
+    echo "/usr/bin/sddm" > /etc/X11/default-display-manager
+    echo "set shared/default-x-display-manager sddm" | debconf-communicate >/dev/null 2>&1 || true
+    systemctl disable gdm3    >/dev/null 2>&1 || true
+    systemctl disable gdm     >/dev/null 2>&1 || true
+    systemctl disable lightdm >/dev/null 2>&1 || true
+    systemctl enable  sddm    >/dev/null 2>&1 || true
+    echo "I: SDDM ingeschakeld, thema 'bearlyos'."
+else
+    echo "W: sddm ontbreekt - login-manager niet gewijzigd (GDM blijft)."
+fi

@@ -1,0 +1,9 @@
+#!/bin/sh
+# Opent het installatieprogramma automatisch, maar ALLEEN in de live-sessie
+# (niet op een reeds geïnstalleerd systeem).
+if grep -qa 'boot=live' /proc/cmdline 2>/dev/null; then
+    sleep 5
+    if command -v calamares >/dev/null 2>&1; then
+        pkexec calamares 2>/dev/null || sudo -E calamares 2>/dev/null || calamares
+    fi
+fi

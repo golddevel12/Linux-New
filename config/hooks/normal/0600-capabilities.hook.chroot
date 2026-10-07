@@ -1,6 +1,5 @@
 #!/bin/sh
-# Laat wifi-captures en packet-sniffing zonder root werken (voor jouw werk),
-# en zet een macOS-achtige Plymouth-opstartanimatie met jouw logo.
+# Wifi-capture zonder root + de Bearly-IT opstartanimatie (Plymouth) activeren.
 set -e
 
 # ── Wireshark/tcpdump zonder sudo laten capturen ───────────────────
@@ -9,12 +8,13 @@ if [ -x /usr/bin/dumpcap ]; then
         || echo "W: setcap op dumpcap mislukt."
 fi
 
-# ── Plymouth-opstartscherm ─────────────────────────────────────────
-if [ -d /usr/share/plymouth/themes/spinner ]; then
-    # Jouw logo als watermerk tijdens het opstarten
-    if [ -f /usr/share/pixmaps/bearly-logo.png ]; then
-        cp /usr/share/pixmaps/bearly-logo.png \
-           /usr/share/plymouth/themes/spinner/watermark.png 2>/dev/null || true
+# ── Bearly-IT opstartscherm instellen ──────────────────────────────
+if [ -d /usr/share/plymouth/themes/bearlyos ]; then
+    if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+        plymouth-set-default-theme bearlyos 2>/dev/null || \
+            echo "W: kon Plymouth-thema niet als standaard zetten."
     fi
-    plymouth-set-default-theme spinner 2>/dev/null || true
+    # 'splash' staat al in de bootappend; initramfs wordt door live-build
+    # opnieuw gebouwd, dus het thema wordt meegenomen.
+    update-initramfs -u 2>/dev/null || true
 fi
