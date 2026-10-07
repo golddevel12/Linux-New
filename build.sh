@@ -41,7 +41,7 @@ lb config \
     --iso-application "$DISTRO_NAME" \
     --iso-publisher "$DISTRO_NAME" \
     --iso-volume "$ISO_VOLUME" \
-    --bootappend-live "boot=live components quiet splash hostname=$LIVE_HOSTNAME username=$LIVE_USERNAME user-fullname=\"$LIVE_FULLNAME\" locales=$LIVE_LOCALE keyboard-layouts=$LIVE_KEYBOARD timezone=$LIVE_TIMEZONE"
+    --bootappend-live "boot=live components quiet splash hostname=$LIVE_HOSTNAME username=$LIVE_USERNAME user-fullname=$LIVE_FULLNAME locales=$LIVE_LOCALE keyboard-layouts=$LIVE_KEYBOARD timezone=$LIVE_TIMEZONE"
 
 # ── Eigen configuratie erover kopiëren (pakketlijsten, hooks, bestanden) ─
 cp -a "$ROOT/config/." config/
