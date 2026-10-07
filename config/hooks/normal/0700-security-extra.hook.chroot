@@ -1,0 +1,56 @@
+#!/bin/sh
+# Extra security-/pentest-tools. Elk pakket wordt los geïnstalleerd; een
+# naam die niet in Debian bestaat wordt netjes overgeslagen zonder de
+# build te laten falen.
+set -e
+echo "I: Extra security-tools installeren (missende worden overgeslagen)..."
+
+apt-get update || true
+
+EXTRA="
+masscan
+netdiscover
+dsniff
+ettercap-graphical
+bettercap
+yersinia
+hping3
+fping
+reaver
+pixiewps
+bully
+cowpatty
+kismet
+mdk3
+wifite
+medusa
+ncrack
+hashid
+chntpw
+crunch
+whatweb
+wfuzz
+dirb
+dirbuster
+wapiti
+skipfish
+binwalk
+foremost
+steghide
+sleuthkit
+radare2
+gdb
+ltrace
+strace
+exploitdb
+"
+
+for pkg in $EXTRA; do
+    if apt-get install -y --no-install-recommends "$pkg" >/dev/null 2>&1; then
+        echo "  + $pkg"
+    else
+        echo "  - $pkg (niet beschikbaar, overgeslagen)"
+    fi
+done
+
+echo "I: Extra security-tools klaar."

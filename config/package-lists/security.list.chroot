@@ -1,0 +1,44 @@
+# Vaste, betrouwbare security-tools uit Debian (zekere pakketnamen).
+# De minder zekere / extra tools staan in hook 0700 (worden overgeslagen
+# als een pakketnaam niet bestaat, zodat de build niet faalt).
+
+# ── Netwerk-scanning / analyse ───────────────────────────────────
+nmap
+tcpdump
+wireshark
+tshark
+ngrep
+arp-scan
+whois
+dnsutils
+mtr-tiny
+netcat-openbsd
+
+# ── Wifi ──────────────────────────────────────────────────────────
+aircrack-ng
+iw
+wireless-tools
+rfkill
+hostapd
+
+# ── Wachtwoorden / hashes ────────────────────────────────────────
+john
+hydra
+hashcat
+
+# ── Web ───────────────────────────────────────────────────────────
+nikto
+sqlmap
+
+# ── Firewall ──────────────────────────────────────────────────────
+ufw
+gufw
+iptables
+
+# ── Overig ────────────────────────────────────────────────────────
+macchanger
+proxychains4
+tor
+openvpn
+wireguard-tools
+socat

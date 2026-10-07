@@ -1,10 +1,13 @@
 #!/bin/sh
-# Zet de naam van de distro in os-release en het inlogscherm van de console.
+# Zet de naam van de distro in os-release en de console.
 set -e
 
 . /usr/share/distro/branding.conf
 
 sed -i "s|^PRETTY_NAME=.*|PRETTY_NAME=\"$DISTRO_NAME $DISTRO_VERSION\"|" /usr/lib/os-release
+sed -i "s|^NAME=.*|NAME=\"$DISTRO_NAME\"|"            /usr/lib/os-release
+sed -i "s|^ID=.*|ID=bearlyos|"                         /usr/lib/os-release || true
+grep -q '^HOME_URL=' /usr/lib/os-release || echo 'HOME_URL="https://github.com/golddevel12/Linux-New"' >> /usr/lib/os-release
 
 printf '%s %s \\n \\l\n\n' "$DISTRO_NAME" "$DISTRO_VERSION" > /etc/issue
 printf '%s %s\n' "$DISTRO_NAME" "$DISTRO_VERSION" > /etc/issue.net

@@ -1,0 +1,24 @@
+#!/bin/sh
+# Installeert Node.js 20 (NodeSource) en daarbovenop Claude Code (CLI).
+# Faalt niet als het niet lukt; dan blijft de in Debian meegeleverde node staan.
+set -e
+echo "I: Node.js 20 + Claude Code installeren..."
+
+if curl -fsSL https://deb.nodesource.com/setup_20.x | bash -; then
+    apt-get install -y nodejs || echo "W: nodejs (NodeSource) niet geïnstalleerd."
+else
+    echo "W: NodeSource-repo niet toegevoegd - Debian-node blijft staan."
+fi
+
+# npm global-map zodat 'claude' voor alle gebruikers beschikbaar is
+npm config set prefix /usr/local -g 2>/dev/null || true
+
+if command -v npm >/dev/null 2>&1; then
+    if npm install -g @anthropic-ai/claude-code; then
+        echo "I: Claude Code geïnstalleerd ($(command -v claude 2>/dev/null))."
+    else
+        echo "W: Claude Code kon niet geïnstalleerd worden - overgeslagen."
+    fi
+else
+    echo "W: npm ontbreekt - Claude Code overgeslagen."
+fi

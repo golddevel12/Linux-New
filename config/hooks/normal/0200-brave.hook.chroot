@@ -1,0 +1,20 @@
+#!/bin/sh
+# Installeert Brave als hoofdbrowser (voegt ook de Brave-repo toe zodat
+# de browser later updates krijgt). Faalt niet als Brave onbereikbaar is.
+set -e
+echo "I: Brave-browser installeren..."
+
+install -d -m 0755 /etc/apt/keyrings
+if curl -fsSL https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
+        -o /etc/apt/keyrings/brave-browser-archive-keyring.gpg; then
+    echo "deb [signed-by=/etc/apt/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" \
+        > /etc/apt/sources.list.d/brave-browser-release.list
+    apt-get update
+    if apt-get install -y brave-browser; then
+        echo "I: Brave geïnstalleerd."
+    else
+        echo "W: Brave kon niet geïnstalleerd worden - overgeslagen."
+    fi
+else
+    echo "W: Brave-sleutel niet op te halen - Brave overgeslagen."
+fi

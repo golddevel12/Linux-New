@@ -1,0 +1,17 @@
+Welkom bij BearlyOS  🐻
+
+Je bent ingelogd als "bear" (wachtwoord: live). sudo werkt zonder wachtwoord.
+
+Handig om te weten
+------------------
+• Browser:        Brave (in de dock)
+• Code schrijven: VS Code ("code") of Neovim ("nvim")
+• Claude Code:    open een terminal en typ:  claude
+• Security-tools: nmap, wireshark, aircrack-ng, hydra, sqlmap, metasploit-
+                  achtige tools, firewall (ufw/nftables), enz.
+• Firewall aan:   sudo ufw enable
+
+Wijzigingen in deze live-sessie verdwijnen na een herstart.
+
+Gebruik de security-tools alleen op systemen en netwerken waarvoor je
+toestemming hebt.
