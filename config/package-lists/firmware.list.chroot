@@ -1,0 +1,10 @@
+# Firmware en microcode, zodat wifi/videokaarten op echte hardware werken
+firmware-linux
+firmware-linux-nonfree
+firmware-misc-nonfree
+firmware-iwlwifi
+firmware-realtek
+firmware-atheros
+firmware-brcm80211
+intel-microcode
+amd64-microcode

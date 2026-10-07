@@ -1,0 +1,47 @@
+# Live-systeem
+live-boot
+live-config
+live-config-systemd
+
+# Desktop (XFCE)
+xfce4
+xfce4-goodies
+lightdm
+lightdm-gtk-greeter
+xorg
+dbus-x11
+fonts-noto
+fonts-noto-color-emoji
+adwaita-icon-theme
+
+# Netwerk, geluid, bluetooth
+network-manager
+network-manager-gnome
+pipewire-audio
+pavucontrol
+blueman
+
+# Programma's
+firefox-esr
+firefox-esr-l10n-nl
+mousepad
+ristretto
+file-roller
+thunar-archive-plugin
+gparted
+synaptic
+
+# Hulpmiddelen
+sudo
+locales
+console-setup
+keyboard-configuration
+curl
+wget
+git
+nano
+htop
+
+# Installatieprogramma (installeren vanaf de USB naar de harde schijf)
+calamares
+calamares-settings-debian

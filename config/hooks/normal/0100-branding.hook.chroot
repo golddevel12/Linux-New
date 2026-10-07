@@ -1,0 +1,10 @@
+#!/bin/sh
+# Zet de naam van de distro in os-release en het inlogscherm van de console.
+set -e
+
+. /usr/share/distro/branding.conf
+
+sed -i "s|^PRETTY_NAME=.*|PRETTY_NAME=\"$DISTRO_NAME $DISTRO_VERSION\"|" /usr/lib/os-release
+
+printf '%s %s \\n \\l\n\n' "$DISTRO_NAME" "$DISTRO_VERSION" > /etc/issue
+printf '%s %s\n' "$DISTRO_NAME" "$DISTRO_VERSION" > /etc/issue.net

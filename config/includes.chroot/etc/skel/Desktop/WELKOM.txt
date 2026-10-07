@@ -1,0 +1,6 @@
+Welkom bij Linux-New!
+
+- Je bent ingelogd als gebruiker "user" (wachtwoord: live).
+- Wil je het systeem vast op je computer installeren?
+  Start dan "Install Debian" (Calamares) vanuit het menu.
+- Wijzigingen in de live-sessie gaan verloren na een herstart.
