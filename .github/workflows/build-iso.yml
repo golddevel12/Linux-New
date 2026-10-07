@@ -42,8 +42,12 @@ jobs:
             debian:bookworm \
             bash -c "apt-get update && apt-get install -y live-build git curl ca-certificates libcap2-bin && ./build.sh"
 
-      - name: ISO opsplitsen als die groter is dan 2 GB
+      - name: Rechten herstellen (out/ is door root in de container gemaakt)
+        run: sudo chown -R "$USER:$USER" out
+
+      - name: ISO opsplitsen voor de Release (>2 GB, alleen bij een tag)
         id: pkg
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           cd out
           iso="$(ls *.iso)"
