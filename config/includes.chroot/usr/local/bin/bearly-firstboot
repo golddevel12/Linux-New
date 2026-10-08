@@ -1,0 +1,65 @@
+#!/bin/sh
+# BearlyOS eerste-start op een GEINSTALLEERD systeem:
+# wacht op netwerk, detecteert de hardware en installeert de juiste
+# drivers/firmware zodat de laptop optimaal werkt. Draait eenmalig.
+set -e
+STAMP=/var/lib/bearly-firstboot.done
+LOG=/var/log/bearly-firstboot.log
+[ -f "$STAMP" ] && exit 0
+
+echo "== BearlyOS eerste-start $(date) ==" >> "$LOG" 2>&1
+
+# ── Wachten op netwerk (max ~90s) ─────────────────────────────────
+NET=0
+i=0
+while [ "$i" -lt 45 ]; do
+    if nm-online -q -t 2 2>/dev/null || ping -c1 -W2 deb.debian.org >/dev/null 2>&1; then
+        NET=1; break
+    fi
+    i=$((i + 1)); sleep 2
+done
+echo "netwerk beschikbaar: $NET" >> "$LOG" 2>&1
+
+if [ "$NET" = "1" ]; then
+    export DEBIAN_FRONTEND=noninteractive
+
+    # non-free inschakelen zodat drivers/firmware installeerbaar zijn
+    if [ -f /etc/apt/sources.list ] && ! grep -q 'non-free' /etc/apt/sources.list; then
+        sed -i 's/ main\( contrib\)\?$/ main contrib non-free non-free-firmware/' \
+            /etc/apt/sources.list 2>/dev/null || true
+    fi
+
+    apt-get update >> "$LOG" 2>&1 || true
+
+    # Basis-firmware (wifi/bluetooth/gpu) aanvullen
+    apt-get install -y --no-install-recommends \
+        firmware-linux firmware-linux-nonfree firmware-misc-nonfree \
+        firmware-iwlwifi firmware-realtek firmware-atheros firmware-brcm80211 \
+        intel-microcode amd64-microcode >> "$LOG" 2>&1 || true
+
+    # ── Videokaart detecteren en driver kiezen ────────────────────
+    GPU="$(lspci 2>/dev/null | grep -Ei 'VGA|3D controller|Display controller' || true)"
+    echo "GPU: $GPU" >> "$LOG" 2>&1
+
+    if echo "$GPU" | grep -qi 'nvidia'; then
+        echo "NVIDIA gedetecteerd -> nvidia-driver installeren" >> "$LOG" 2>&1
+        apt-get install -y nvidia-driver >> "$LOG" 2>&1 || \
+            echo "W: nvidia-driver niet geinstalleerd" >> "$LOG" 2>&1
+    fi
+    if echo "$GPU" | grep -Eqi 'amd|radeon|ati'; then
+        apt-get install -y firmware-amd-graphics >> "$LOG" 2>&1 || true
+    fi
+    # Intel werkt met de reeds aanwezige firmware-misc-nonfree + mesa.
+
+    update-initramfs -u >> "$LOG" 2>&1 || true
+    echo "drivers/firmware stap klaar" >> "$LOG" 2>&1
+else
+    echo "Geen netwerk -> drivers overgeslagen (worden bij een volgende start opnieuw geprobeerd)" >> "$LOG" 2>&1
+    # Geen stamp zetten, zodat het bij de volgende start opnieuw probeert.
+    exit 0
+fi
+
+mkdir -p /var/lib
+date > "$STAMP"
+systemctl disable bearly-firstboot.service >/dev/null 2>&1 || true
+exit 0

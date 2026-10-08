@@ -1,0 +1,14 @@
+[Unit]
+Description=BearlyOS: auto-login uitschakelen op een geinstalleerd systeem
+# Draait ALLEEN op een geinstalleerd systeem (niet bij boot=live), en nog
+# voordat de login-manager start, zodat het login-scherm verschijnt.
+ConditionKernelCommandLine=!boot=live
+Before=sddm.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/rm -f /etc/sddm.conf.d/20-autologin.conf
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sddm.service

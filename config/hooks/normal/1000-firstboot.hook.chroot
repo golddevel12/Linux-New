@@ -1,0 +1,20 @@
+#!/bin/sh
+# Schakelt de login-fix (auto-login uit op geinstalleerd systeem) en de
+# eerste-start driver-service in, en zorgt dat het netwerk beheerd wordt.
+set -e
+echo "I: Eerste-start services inschakelen..."
+
+chmod +x /usr/local/bin/bearly-firstboot 2>/dev/null || true
+
+systemctl enable bearly-login-fix.service >/dev/null 2>&1 \
+    || echo "W: bearly-login-fix niet ingeschakeld."
+systemctl enable bearly-firstboot.service >/dev/null 2>&1 \
+    || echo "W: bearly-firstboot niet ingeschakeld."
+
+# NetworkManager beheert het netwerk (wifi/ethernet) in live én installatie
+systemctl enable NetworkManager.service >/dev/null 2>&1 || true
+# Laat NetworkManager alle apparaten beheren (geen lege interfaces-config nodig)
+printf '[main]\nplugins=keyfile\n\n[keyfile]\nunmanaged-devices=none\n' \
+    > /etc/NetworkManager/conf.d/10-bearly.conf 2>/dev/null || true
+
+echo "I: Eerste-start services klaar."

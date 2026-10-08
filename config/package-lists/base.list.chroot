@@ -16,6 +16,8 @@ nftables
 iproute2
 net-tools
 libcap2-bin
+iputils-ping
+pciutils
 
 # ── Ontwikkelen / code schrijven ─────────────────────────────────
 git

@@ -1,0 +1,15 @@
+[Unit]
+Description=BearlyOS eerste-start: netwerk, hardware-detectie en drivers
+# Alleen op een geinstalleerd systeem (niet in de live-sessie), eenmalig.
+ConditionKernelCommandLine=!boot=live
+ConditionPathExists=!/var/lib/bearly-firstboot.done
+
+[Service]
+# Type=simple -> blokkeert het opstarten/inloggen niet; het script wacht
+# zelf op netwerk en installeert daarna op de achtergrond.
+Type=simple
+ExecStart=/usr/local/bin/bearly-firstboot
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
