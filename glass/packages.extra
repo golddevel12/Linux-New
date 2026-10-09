@@ -1,0 +1,80 @@
+# ── BearlyOS Glass: desktop-pakketten (bovenop archiso 'releng') ──
+# Alleen officiële Arch-repos (extra/core). Calamares/Brave komen later
+# via chaotic-aur in glass-build #2.
+
+# Netwerk
+networkmanager
+network-manager-applet
+wireless-regdb
+iwd
+
+# Geluid (PipeWire)
+pipewire
+pipewire-alsa
+pipewire-pulse
+wireplumber
+pavucontrol
+
+# Grafisch / Wayland
+mesa
+vulkan-intel
+vulkan-radeon
+xorg-xwayland
+qt5-wayland
+qt6-wayland
+qt6-svg
+qt6-5compat
+polkit
+polkit-gnome
+
+# ── Hyprland + glas-ecosysteem ──
+hyprland
+hyprpaper
+hyprlock
+hypridle
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+xdg-user-dirs
+waybar
+rofi-wayland
+dunst
+kitty
+grim
+slurp
+wl-clipboard
+cliphist
+brightnessctl
+playerctl
+
+# Login-manager (met ons animatie-thema)
+sddm
+
+# Thema / uiterlijk
+kvantum
+nwg-look
+papirus-icon-theme
+noto-fonts
+noto-fonts-emoji
+ttf-dejavu
+ttf-jetbrains-mono-nerd
+
+# Bestandsbeheer (toont schijven + capaciteitsbalk)
+dolphin
+dolphin-plugins
+ffmpegthumbs
+gvfs
+gvfs-mtp
+gvfs-afc
+udisks2
+ntfs-3g
+exfatprogs
+
+# Basis-gereedschap
+git
+vim
+nano
+htop
+wget
+curl
+sudo
+unzip

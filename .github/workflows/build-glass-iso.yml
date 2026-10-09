@@ -1,0 +1,84 @@
+name: Build Glass ISO
+
+on:
+  workflow_dispatch:          # handmatig: Actions -> Build Glass ISO -> Run workflow
+  push:
+    tags:
+      - "glass-v*"             # tag zoals glass-v1.0 maakt een Release
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Schijfruimte vrijmaken
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune -af || true
+          df -h /
+
+      - name: Versie bepalen
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "version=${GITHUB_REF_NAME#glass-}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=dev-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: ISO bouwen (in Arch-container)
+        run: |
+          docker run --rm --privileged \
+            -v "$GITHUB_WORKSPACE":/src -w /src \
+            -e DISTRO_VERSION="${{ steps.version.outputs.version }}" \
+            archlinux:latest \
+            bash -c "
+              pacman -Sy --noconfirm archlinux-keyring &&
+              pacman -S  --noconfirm --needed archiso git &&
+              chmod +x glass/build-glass.sh &&
+              ./glass/build-glass.sh
+            "
+
+      - name: Rechten herstellen
+        run: sudo chown -R "$USER:$USER" out
+
+      - name: ISO opsplitsen voor de Release (>2 GB, alleen bij een tag)
+        id: pkg
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cd out
+          iso="$(ls *.iso)"
+          size=$(stat -c %s "$iso")
+          echo "ISO: $iso ($size bytes)"
+          if [ "$size" -ge 2000000000 ]; then
+            split -b 1900M -d --additional-suffix=.part "$iso" "${iso}."
+            rm -f "$iso"
+            echo "split=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "split=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Uploaden als artifact (bij handmatige run)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bearlyos-glass-${{ steps.version.outputs.version }}
+          path: out/
+          compression-level: 0
+          retention-days: 14
+
+      - name: Release publiceren
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: BearlyOS Glass ${{ steps.version.outputs.version }}
+          files: |
+            out/*

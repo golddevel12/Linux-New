@@ -1,0 +1,10 @@
+NAME="BearlyOS Glass"
+PRETTY_NAME="BearlyOS Glass"
+ID=bearlyos
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;244;166;59"
+HOME_URL="https://github.com/golddevel12/Linux-New"
+LOGO=bearly
+VARIANT="Glass Edition"
+BEARLY_FOUNDER="Luka Biart"

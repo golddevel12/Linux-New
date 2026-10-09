@@ -1,0 +1,14 @@
+[Unit]
+Description=BearlyOS Glass: live-gebruiker aanmaken
+# Alleen in de live-ISO (archiso), nog voordat de login-manager start.
+ConditionPathExists=/run/archiso/bootmnt
+Before=sddm.service
+After=systemd-user-sessions.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh /usr/local/bin/bearly-liveuser
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sddm.service
