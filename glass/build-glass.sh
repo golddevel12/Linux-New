@@ -47,14 +47,35 @@ require_pkgs() {
     return "$missing"
 }
 
-# Zoekt de naam van het Calamares-pakket (chaotic-aur kan het onder een andere naam hebben).
-pick_calamares() {
-    local list c
-    list="$(pacman -Ssq '^calamares' 2>/dev/null || true)"
-    for c in calamares calamares-git; do
-        if grep -qx "$c" <<<"$list"; then echo "$c"; return 0; fi
+# Bouwt een pakket uit de AUR als gewone gebruiker ("builder", zonder sudo).
+# Veiligheid: afhankelijkheden worden als root vanuit de officiële repo's
+# geinstalleerd, en alle bronnen moeten van het Calamares-project zelf komen.
+build_calamares() {
+    local name="$1" dir info bad deps pkg
+    dir="$(su builder -c 'mktemp -d /home/builder/aur.XXXXXX')"
+    su builder -c "git clone --depth 1 https://aur.archlinux.org/${name}.git ${dir}/${name}" || return 1
+    info="$(su builder -c "bash ${WORK}/aur-info.sh ${dir}/${name}")" || return 1
+    sed 's/^/  /' <<<"$info"
+
+    bad="$(grep '^SRC .*://' <<<"$info" | grep -vE '://(codeload\.)?github\.com/calamares/' || true)"
+    if [ -n "$bad" ]; then
+        echo "E: onverwachte bron(nen) in de PKGBUILD van $name:" >&2
+        echo "$bad" >&2
+        return 1
+    fi
+
+    deps="$(grep '^DEP ' <<<"$info" | sed -e 's/^DEP //' -e 's/[<>=].*//' | grep -v '^$' | sort -u | tr '\n' ' ')"
+    echo "Afhankelijkheden installeren: $deps"
+    # shellcheck disable=SC2086
+    pacman -S --noconfirm --needed $deps || return 1
+
+    su builder -c "cd ${dir}/${name} && MAKEFLAGS=-j$(nproc) makepkg --noconfirm --skippgpcheck -f" || return 1
+    for pkg in "${dir}/${name}"/*.pkg.tar.*; do
+        case "$pkg" in *-debug-*|*.sig) continue ;; esac
+        cp "$pkg" "$WORK/localrepo/"
+        pacman -Qpq "$pkg" >> "$WORK/pkgnames"
     done
-    grep -vE 'settings|config|branding|extensions|autologin|theme|eos|debian' <<<"$list" | head -n1 || true
+    [ -s "$WORK/pkgnames" ]
 }
 
 # Zet uitvoerbare bestanden in file_permissions (mkarchiso bewaart anders geen rechten).
@@ -102,17 +123,47 @@ find "$AIROOT/etc/systemd/system" \
     \( -name 'systemd-networkd*' -o -name 'iwd.service' \) -exec rm -rf {} + 2>/dev/null || true
 
 # ── 3. Pakketten ──────────────────────────────────────────────────
-step "installer-pakket zoeken"
-echo "Pakketten in de bronnen met 'calamares' in de naam:"
+step "Calamares bouwen uit de AUR (niet beschikbaar in binaire repo's)"
+echo "Diagnose - pakketten met 'calamares' in de repo's (leeg = geen):"
 pacman -Ssq calamares | sed 's/^/  /' || true
-echo "Relevante pakketten in chaotic-aur:"
-pacman -Sl chaotic-aur | grep -iE 'calamares|ckbcomp|kpmcore' | sed 's/^/  /' || true
-CALA="$(pick_calamares)"
-if [ -z "$CALA" ]; then
-    echo "E: geen Calamares-pakket gevonden in de pakketbronnen" >&2
+
+id builder >/dev/null 2>&1 || useradd -m builder
+mkdir -p "$WORK/localrepo"
+: > "$WORK/pkgnames"
+
+cat > "$WORK/aur-info.sh" <<'EOF'
+#!/bin/bash
+# Leest bronnen en afhankelijkheden uit een PKGBUILD (draait als gewone gebruiker).
+cd "$1" || exit 1
+# shellcheck disable=SC1091
+source ./PKGBUILD
+printf 'SRC %s\n' "${source[@]}"
+printf 'DEP %s\n' "${depends[@]}" "${makedepends[@]}"
+EOF
+chmod 755 "$WORK/aur-info.sh"
+
+CALA_OK=0
+for aur in calamares calamares-git; do
+    echo "--- poging: AUR/$aur ---"
+    if build_calamares "$aur"; then
+        CALA_OK=1
+        break
+    fi
+    echo "W: bouwen van AUR/$aur is mislukt" >&2
+    : > "$WORK/pkgnames"
+done
+if [ "$CALA_OK" != "1" ]; then
+    echo "E: Calamares kon niet gebouwd worden" >&2
     exit 1
 fi
-echo "Gekozen installer-pakket: $CALA"
+(cd "$WORK/localrepo" && repo-add bearly-local.db.tar.gz ./*.pkg.tar.*)
+
+cat >> "$PROFILE/pacman.conf" <<EOF
+
+[bearly-local]
+SigLevel = Optional TrustAll
+Server = file://$WORK/localrepo
+EOF
 
 step "pakketlijsten samenstellen"
 {
@@ -121,7 +172,7 @@ step "pakketlijsten samenstellen"
     require_pkgs "$HERE/packages.extra"
     filter_pkgs "$HERE/packages.optional"
     require_pkgs "$HERE/packages.chaotic"
-    echo "$CALA"
+    cat "$WORK/pkgnames"
     filter_pkgs "$HERE/packages.chaotic.optional"
 } >> "$PROFILE/packages.x86_64"
 
