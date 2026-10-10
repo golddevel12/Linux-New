@@ -15,6 +15,21 @@ CHAOTIC_KEY="3056513887B78AEB"
 
 step() { echo; echo "=== $* ==="; }
 
+# Probeert een commando een paar keer opnieuw (pakketservers geven soms tijdelijk een 503).
+retry() {
+    local tries="$1" wait="$2" i=1
+    shift 2
+    until "$@"; do
+        if [ "$i" -ge "$tries" ]; then
+            echo "E: '$*' faalde $tries keer" >&2
+            return 1
+        fi
+        echo "W: poging $i/$tries mislukt; opnieuw over ${wait}s..." >&2
+        i=$((i + 1))
+        sleep "$wait"
+    done
+}
+
 # Geeft alleen de pakketten uit een lijst die echt bestaan (waarschuwt voor de rest).
 filter_pkgs() {
     local file="$1" p
@@ -98,9 +113,9 @@ step "chaotic-aur toevoegen"
 # De container heeft nog geen eigen sleutel om andere sleutels lokaal mee te ondertekenen.
 pacman-key --init
 pacman-key --populate archlinux
-pacman-key --recv-keys "$CHAOTIC_KEY" --keyserver hkps://keyserver.ubuntu.com
+retry 5 20 pacman-key --recv-keys "$CHAOTIC_KEY" --keyserver hkps://keyserver.ubuntu.com
 pacman-key --lsign-key "$CHAOTIC_KEY"
-pacman -U --noconfirm \
+retry 6 30 pacman -U --noconfirm \
     'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' \
     'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
 if ! grep -q '^\[chaotic-aur\]' /etc/pacman.conf; then
