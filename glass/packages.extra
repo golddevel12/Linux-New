@@ -43,7 +43,7 @@ xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk
 xdg-user-dirs
 waybar
-rofi-wayland
+rofi
 dunst
 kitty
 grim
@@ -110,7 +110,6 @@ zsh
 tree
 unzip
 zip
-p7zip
 neovim
 vim
 nano
@@ -121,5 +120,4 @@ sudo
 
 # Firewall + netwerktools
 ufw
-iptables-nft
 nmap
