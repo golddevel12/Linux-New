@@ -57,7 +57,9 @@ build_calamares() {
     info="$(su builder -c "bash ${WORK}/aur-info.sh ${dir}/${name}")" || return 1
     sed 's/^/  /' <<<"$info"
 
-    bad="$(grep '^SRC .*://' <<<"$info" | grep -vE '://(codeload\.)?github\.com/calamares/' || true)"
+    # Toegestaan: de officiele Calamares-repo op Codeberg (het project is daar naartoe
+    # verhuisd; de oude GitHub-repo is gearchiveerd) en de oude GitHub-locatie.
+    bad="$(grep '^SRC .*://' <<<"$info" | grep -vE '://((codeload\.)?github\.com/calamares/|codeberg\.org/Calamares/calamares[/.])' || true)"
     if [ -n "$bad" ]; then
         echo "E: onverwachte bron(nen) in de PKGBUILD van $name:" >&2
         echo "$bad" >&2
