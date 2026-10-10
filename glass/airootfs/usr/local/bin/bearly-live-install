@@ -1,0 +1,10 @@
+#!/bin/sh
+# Opent het installatieprogramma automatisch, maar ALLEEN in de live-sessie
+# (niet op een reeds geinstalleerd systeem).
+[ -d /run/archiso ] || exit 0
+
+sleep 4
+# Calamares draait als root; geef root toegang tot de XWayland-display.
+xhost +si:localuser:root >/dev/null 2>&1 || true
+
+exec sudo -E env DISPLAY="${DISPLAY:-:0}" QT_QPA_PLATFORM=xcb calamares

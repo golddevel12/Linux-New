@@ -1,0 +1,64 @@
+#!/bin/sh
+# Draait in de chroot van het NIEUW geinstalleerde systeem (via Calamares).
+# Haalt alles weg wat alleen voor de live-USB bedoeld was en maakt het
+# systeem zelfstandig. Best-effort: een fout stopt de installatie niet.
+
+# 1. Live-only zaken verwijderen (anders zwart scherm / onveilig systeem)
+rm -f /etc/sddm.conf.d/20-autologin.conf
+rm -f /etc/sudoers.d/10-bearly-live
+rm -f /etc/systemd/system/sddm.service.wants/bearly-liveuser.service
+rm -rf /etc/systemd/system/getty@tty1.service.d
+rm -f /root/.zlogin /root/.automated_script.sh /etc/motd
+rm -f /etc/ssh/sshd_config.d/10-archiso.conf
+rm -f /etc/systemd/system/multi-user.target.wants/sshd.service
+rm -f /etc/systemd/system/*.wants/pacman-init.service
+
+# 2. Root-account vergrendelen (in de live-ISO had root een leeg wachtwoord)
+passwd -l root >/dev/null 2>&1
+
+# 3. Initramfs terug naar de gewone Arch-opzet (de live-ISO gebruikt archiso-hooks)
+rm -f /etc/mkinitcpio.conf.d/archiso.conf
+cat > /etc/mkinitcpio.d/linux.preset <<'EOF'
+# mkinitcpio preset file for the 'linux' package
+ALL_config="/etc/mkinitcpio.conf"
+ALL_kver="/boot/vmlinuz-linux"
+
+PRESETS=('default' 'fallback')
+
+default_image="/boot/initramfs-linux.img"
+
+fallback_image="/boot/initramfs-linux-fallback.img"
+fallback_options="-S autodetect"
+EOF
+
+# 4. Pacman-sleutelbos initialiseren op het nieuwe systeem
+pacman-key --init >/dev/null 2>&1
+pacman-key --populate >/dev/null 2>&1
+
+# 5. Zorg dat pacman altijd een werkende mirror heeft
+if [ -f /etc/pacman.d/mirrorlist ] && ! grep -q '^Server' /etc/pacman.d/mirrorlist; then
+    sed -i '1i Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch' /etc/pacman.d/mirrorlist
+fi
+
+# 6. GRUB: BearlyOS-naam en dual-boot (Windows) detecteren
+if [ -f /etc/default/grub ]; then
+    sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="BearlyOS"/' /etc/default/grub
+    if grep -q '^#\?GRUB_DISABLE_OS_PROBER' /etc/default/grub; then
+        sed -i 's/^#\?GRUB_DISABLE_OS_PROBER=.*/GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub
+    else
+        echo 'GRUB_DISABLE_OS_PROBER=false' >> /etc/default/grub
+    fi
+fi
+
+# 7. Toetsenbordindeling van de installatie ook in Hyprland gebruiken
+KB=""
+if [ -f /etc/X11/xorg.conf.d/00-keyboard.conf ]; then
+    KB="$(sed -n 's/.*XkbLayout"[[:space:]]*"\([^"]*\)".*/\1/p' /etc/X11/xorg.conf.d/00-keyboard.conf | head -n1)"
+fi
+if [ -n "$KB" ]; then
+    for f in /etc/skel/.config/hypr/hyprland.conf /home/*/.config/hypr/hyprland.conf; do
+        [ -f "$f" ] && sed -i "s/^\([[:space:]]*kb_layout[[:space:]]*=[[:space:]]*\).*/\1$KB/" "$f"
+    done
+fi
+
+exit 0

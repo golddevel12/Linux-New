@@ -1,0 +1,26 @@
+window {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+#box {
+    padding: 8px 12px;
+}
+
+button, image {
+    background: none;
+    border-style: none;
+    box-shadow: none;
+    color: #f4f4f6;
+}
+
+button {
+    padding: 4px;
+    margin: 0 4px;
+    border-radius: 14px;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.20);
+}

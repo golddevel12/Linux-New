@@ -1,0 +1,14 @@
+// Laat gebruikers in de groep "wheel" schijven (zoals je Windows C:-schijf)
+// aankoppelen in Dolphin zonder wachtwoord. Formatteren/partitioneren blijft
+// wel beveiligd.
+polkit.addRule(function(action, subject) {
+    var ids = [
+        "org.freedesktop.udisks2.filesystem-mount",
+        "org.freedesktop.udisks2.filesystem-mount-system",
+        "org.freedesktop.udisks2.filesystem-unmount-others",
+        "org.freedesktop.udisks2.eject-media"
+    ];
+    if (ids.indexOf(action.id) >= 0 && subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+    }
+});

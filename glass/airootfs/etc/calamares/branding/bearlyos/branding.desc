@@ -1,0 +1,37 @@
+---
+componentName:  bearlyos
+
+welcomeStyleCalamares: true
+welcomeExpandingLogo: false
+windowExpanding: normal
+windowSize: 900px,600px
+windowPlacement: center
+sidebar: left
+navigation: widget
+
+strings:
+    productName:         BearlyOS
+    shortProductName:    BearlyOS
+    version:             Glass Edition
+    shortVersion:        Glass
+    versionedName:       BearlyOS Glass — Oprichter Luka Biart
+    shortVersionedName:  BearlyOS Glass
+    bootloaderEntryName: BearlyOS
+    productUrl:          https://github.com/golddevel12/Linux-New
+    supportUrl:          https://github.com/golddevel12/Linux-New/issues
+    knownIssuesUrl:      https://github.com/golddevel12/Linux-New/issues
+    releaseNotesUrl:     https://github.com/golddevel12/Linux-New/releases
+
+images:
+    productLogo:         "logo.png"
+    productIcon:         "icon.png"
+    productWelcome:      "welcome.png"
+
+slideshow:               "show.qml"
+slideshowAPI: 2
+
+style:
+   SidebarBackground:    "#101014"
+   SidebarText:          "#F4F4F6"
+   SidebarTextSelect:    "#101014"
+   SidebarTextHighlight: "#F4A63B"

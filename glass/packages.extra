@@ -1,12 +1,16 @@
-# ── BearlyOS Glass: desktop-pakketten (bovenop archiso 'releng') ──
-# Alleen officiële Arch-repos (extra/core). Calamares/Brave komen later
-# via chaotic-aur in glass-build #2.
+# ── BearlyOS Glass: VERPLICHTE pakketten uit de officiële Arch-repos ──
+# (bovenop archiso 'releng'). Ontbreekt er één, dan faalt de build bewust.
+# Optionele pakketten staan in packages.optional (die worden gefilterd).
 
 # Netwerk
 networkmanager
 network-manager-applet
+nm-connection-editor
+wpa_supplicant
 wireless-regdb
-iwd
+bluez
+bluez-utils
+blueman
 
 # Geluid (PipeWire)
 pipewire
@@ -15,11 +19,14 @@ pipewire-pulse
 wireplumber
 pavucontrol
 
-# Grafisch / Wayland
+# Grafisch / Wayland / X11 (voor de SDDM-greeter)
 mesa
 vulkan-intel
 vulkan-radeon
+xorg-server
 xorg-xwayland
+xorg-xhost
+xorg-xauth
 qt5-wayland
 qt6-wayland
 qt6-svg
@@ -27,7 +34,7 @@ qt6-5compat
 polkit
 polkit-gnome
 
-# ── Hyprland + glas-ecosysteem ──
+# Hyprland + glas-ecosysteem
 hyprland
 hyprpaper
 hyprlock
@@ -46,13 +53,14 @@ cliphist
 brightnessctl
 playerctl
 
-# Login-manager (met ons animatie-thema)
+# Login-manager
 sddm
 
-# Thema / uiterlijk
+# Thema / lettertypen
 kvantum
 nwg-look
 papirus-icon-theme
+breeze-icons
 noto-fonts
 noto-fonts-emoji
 ttf-dejavu
@@ -69,12 +77,49 @@ udisks2
 ntfs-3g
 exfatprogs
 
-# Basis-gereedschap
+# Installatie op schijf (Calamares komt uit packages.chaotic)
+grub
+efibootmgr
+os-prober
+dosfstools
+e2fsprogs
+btrfs-progs
+xfsprogs
+cryptsetup
+rsync
+squashfs-tools
+intel-ucode
+amd-ucode
+sof-firmware
+pciutils
+
+# Ontwikkelen
+base-devel
 git
+nodejs
+npm
+python
+python-pip
+github-cli
+ripgrep
+fd
+fzf
+jq
+tmux
+zsh
+tree
+unzip
+zip
+p7zip
+neovim
 vim
 nano
 htop
 wget
 curl
 sudo
-unzip
+
+# Firewall + netwerktools
+ufw
+iptables-nft
+nmap

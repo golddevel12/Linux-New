@@ -1,0 +1,53 @@
+# ── OPTIONELE pakketten (officiële Arch-repos) ──
+# Ontbrekende pakketnamen worden bij het bouwen overgeslagen met een waarschuwing.
+
+# Ontwikkelen
+code
+go
+rust
+
+# Thema
+qt6ct
+
+# Security / pentesting
+wireshark-qt
+tcpdump
+aircrack-ng
+hashcat
+john
+hydra
+sqlmap
+nikto
+bettercap
+ettercap
+kismet
+mitmproxy
+masscan
+hping
+gobuster
+ffuf
+wfuzz
+radare2
+gdb
+binwalk
+foremost
+sleuthkit
+reaver
+pixiewps
+wifite
+macchanger
+proxychains-ng
+tor
+torsocks
+openvpn
+wireguard-tools
+socat
+whois
+bind
+mtr
+traceroute
+arp-scan
+openbsd-netcat
+lynis
+clamav
+gufw

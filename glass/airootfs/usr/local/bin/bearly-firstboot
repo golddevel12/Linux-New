@@ -1,0 +1,56 @@
+#!/bin/sh
+# BearlyOS Glass eerste start op een GEINSTALLEERD systeem:
+# wacht op netwerk, herkent de hardware en installeert de juiste
+# microcode/firmware/drivers. Draait eenmalig, op de achtergrond.
+STAMP=/var/lib/bearly-firstboot.done
+LOG=/var/log/bearly-firstboot.log
+[ -f "$STAMP" ] && exit 0
+exec >>"$LOG" 2>&1
+echo "== BearlyOS firstboot $(date) =="
+
+# Wacht tot er netwerk is (max ~3 min)
+NET=0
+i=0
+while [ "$i" -lt 90 ]; do
+    if nm-online -q -t 2 2>/dev/null || ping -c1 -W2 archlinux.org >/dev/null 2>&1; then
+        NET=1
+        break
+    fi
+    i=$((i + 1))
+    sleep 2
+done
+if [ "$NET" != "1" ]; then
+    echo "Geen netwerk; opnieuw proberen bij de volgende start."
+    exit 0
+fi
+
+PKGS="linux-firmware sof-firmware"
+grep -qi GenuineIntel /proc/cpuinfo && PKGS="$PKGS intel-ucode"
+grep -qi AuthenticAMD /proc/cpuinfo && PKGS="$PKGS amd-ucode"
+
+# Videokaart herkennen. De open NVIDIA-driver (nvidia-open) ondersteunt
+# Turing en nieuwer (PCI-id >= 0x1e00); oudere kaarten houden nouveau.
+NV=""
+GPU="$(lspci -nn 2>/dev/null | grep -Ei 'VGA|3D|Display')"
+echo "GPU: $GPU"
+NVID="$(echo "$GPU" | grep -i nvidia | head -n1 | sed -n 's/.*\[10de:\([0-9a-fA-F]\{4\}\)\].*/\1/p')"
+if [ -n "$NVID" ]; then
+    if [ $((0x$NVID)) -ge $((0x1e00)) ]; then
+        NV="nvidia-open nvidia-utils"
+    else
+        echo "Oudere NVIDIA-kaart ($NVID): nouveau blijft in gebruik."
+    fi
+fi
+
+echo "Installeren: $PKGS $NV"
+if pacman -Syu --noconfirm --needed $PKGS $NV; then
+    if [ -n "$NV" ] && [ -f /etc/default/grub ] && ! grep -q 'nvidia_drm.modeset' /etc/default/grub; then
+        sed -i 's/^\(GRUB_CMDLINE_LINUX_DEFAULT="[^"]*\)"/\1 nvidia_drm.modeset=1"/' /etc/default/grub
+    fi
+    grub-mkconfig -o /boot/grub/grub.cfg
+    date > "$STAMP"
+    echo "Klaar. Herstart aanbevolen zodat nieuwe drivers actief worden."
+else
+    echo "pacman faalde; opnieuw proberen bij de volgende start."
+fi
+exit 0

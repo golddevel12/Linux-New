@@ -41,8 +41,7 @@ jobs:
             -e DISTRO_VERSION="${{ steps.version.outputs.version }}" \
             archlinux:latest \
             bash -c "
-              pacman -Sy --noconfirm archlinux-keyring &&
-              pacman -S  --noconfirm --needed archiso git &&
+              pacman -Syu --noconfirm --needed archlinux-keyring archiso git nodejs npm &&
               chmod +x glass/build-glass.sh &&
               ./glass/build-glass.sh
             "
