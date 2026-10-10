@@ -45,6 +45,9 @@ mkdir -p "$WORK" "$OUT"
 
 # ── 1. chaotic-aur (voor Calamares en Brave) ──────────────────────
 step "chaotic-aur toevoegen"
+# De container heeft nog geen eigen sleutel om andere sleutels lokaal mee te ondertekenen.
+pacman-key --init
+pacman-key --populate archlinux
 pacman-key --recv-keys "$CHAOTIC_KEY" --keyserver hkps://keyserver.ubuntu.com
 pacman-key --lsign-key "$CHAOTIC_KEY"
 pacman -U --noconfirm \
