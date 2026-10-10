@@ -1,5 +1,6 @@
 # ── VERPLICHTE pakketten uit chaotic-aur (voorgecompileerd) ──
-calamares
+# Het installatiepakket (Calamares) wordt in build-glass.sh zelf gezocht,
+# omdat de pakketnaam in chaotic-aur kan verschillen.
 brave-bin
 chaotic-keyring
 chaotic-mirrorlist

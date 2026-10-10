@@ -30,6 +30,33 @@ filter_pkgs() {
     done < "$file"
 }
 
+# Controleert dat ALLE verplichte pakketten bestaan en meldt alle ontbrekende in één keer.
+require_pkgs() {
+    local file="$1" p missing=0
+    while IFS= read -r p; do
+        p="${p%%#*}"
+        p="${p//[[:space:]]/}"
+        [ -z "$p" ] && continue
+        if pacman -Si "$p" >/dev/null 2>&1 || [ -n "$(pacman -Sgq "$p" 2>/dev/null)" ]; then
+            echo "$p"
+        else
+            echo "E: verplicht pakket '$p' niet gevonden" >&2
+            missing=1
+        fi
+    done < "$file"
+    return "$missing"
+}
+
+# Zoekt de naam van het Calamares-pakket (chaotic-aur kan het onder een andere naam hebben).
+pick_calamares() {
+    local list c
+    list="$(pacman -Ssq '^calamares' 2>/dev/null || true)"
+    for c in calamares calamares-git; do
+        if grep -qx "$c" <<<"$list"; then echo "$c"; return 0; fi
+    done
+    grep -vE 'settings|config|branding|extensions|autologin|theme|eos|debian' <<<"$list" | head -n1 || true
+}
+
 # Zet uitvoerbare bestanden in file_permissions (mkarchiso bewaart anders geen rechten).
 add_exec_perms() {
     local sub="$1" f rel
@@ -75,13 +102,26 @@ find "$AIROOT/etc/systemd/system" \
     \( -name 'systemd-networkd*' -o -name 'iwd.service' \) -exec rm -rf {} + 2>/dev/null || true
 
 # ── 3. Pakketten ──────────────────────────────────────────────────
+step "installer-pakket zoeken"
+echo "Pakketten in de bronnen met 'calamares' in de naam:"
+pacman -Ssq calamares | sed 's/^/  /' || true
+echo "Relevante pakketten in chaotic-aur:"
+pacman -Sl chaotic-aur | grep -iE 'calamares|ckbcomp|kpmcore' | sed 's/^/  /' || true
+CALA="$(pick_calamares)"
+if [ -z "$CALA" ]; then
+    echo "E: geen Calamares-pakket gevonden in de pakketbronnen" >&2
+    exit 1
+fi
+echo "Gekozen installer-pakket: $CALA"
+
 step "pakketlijsten samenstellen"
 {
     echo
     echo "# --- BearlyOS Glass ---"
-    grep -vE '^[[:space:]]*(#|$)' "$HERE/packages.extra"
+    require_pkgs "$HERE/packages.extra"
     filter_pkgs "$HERE/packages.optional"
-    grep -vE '^[[:space:]]*(#|$)' "$HERE/packages.chaotic"
+    require_pkgs "$HERE/packages.chaotic"
+    echo "$CALA"
     filter_pkgs "$HERE/packages.chaotic.optional"
 } >> "$PROFILE/packages.x86_64"
 
