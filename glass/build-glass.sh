@@ -207,6 +207,22 @@ cp -a "$REPO/config/includes.chroot/usr/share/sddm/themes/bearlyos" \
       "$AIROOT/usr/share/sddm/themes/bearlyos"
 echo "QtVersion=6" >> "$AIROOT/usr/share/sddm/themes/bearlyos/metadata.desc"
 
+# Live-gebruiker 'bear' (uid 1000, leeg wachtwoord) al in het image zetten,
+# zodat SDDM hem direct ziet en de autologin werkt.
+step "live-gebruiker in image"
+grep -q '^bear:' "$AIROOT/etc/passwd" || echo 'bear:x:1000:1000:Bear:/home/bear:/bin/bash' >> "$AIROOT/etc/passwd"
+grep -q '^bear:' "$AIROOT/etc/shadow" || echo 'bear::14871::::::' >> "$AIROOT/etc/shadow"
+grep -q '^bear:' "$AIROOT/etc/group"  || echo 'bear:x:1000:' >> "$AIROOT/etc/group"
+grep -q '^bear:' "$AIROOT/etc/gshadow" || echo 'bear:!::' >> "$AIROOT/etc/gshadow"
+for f in group gshadow; do
+    if grep -q '^wheel:' "$AIROOT/etc/$f"; then
+        sed -i -E '/^wheel:/{/(:|,)bear$/!{s/:$/:bear/;t;s/$/,bear/}}' "$AIROOT/etc/$f"
+    else
+        [ "$f" = group ] && echo 'wheel:x:998:bear' >> "$AIROOT/etc/$f" || echo 'wheel:!::bear' >> "$AIROOT/etc/$f"
+    fi
+done
+grep -E '^(bear|wheel):' "$AIROOT/etc/passwd" "$AIROOT/etc/group" "$AIROOT/etc/shadow" "$AIROOT/etc/gshadow"
+
 # pacman.conf voor het geinstalleerde systeem (met chaotic-aur, zonder
 # de docker-specifieke NoExtract-regels)
 grep -vE '^(NoExtract|NoUpgrade)' /etc/pacman.conf \
@@ -228,7 +244,7 @@ ln -sf /usr/lib/systemd/system/NetworkManager.service  "$A/multi-user.target.wan
 ln -sf /usr/lib/systemd/system/ufw.service             "$A/multi-user.target.wants/ufw.service"
 ln -sf /usr/lib/systemd/system/bluetooth.service       "$A/bluetooth.target.wants/bluetooth.service"
 ln -sf /usr/lib/systemd/system/bluetooth.service       "$A/dbus-org.bluez.service"
-ln -sf /etc/systemd/system/bearly-liveuser.service     "$A/sddm.service.wants/bearly-liveuser.service"
+ln -sf /etc/systemd/system/bearly-liveuser.service     "$A/multi-user.target.wants/bearly-liveuser.service"
 ln -sf /etc/systemd/system/bearly-firstboot.service    "$A/multi-user.target.wants/bearly-firstboot.service"
 
 # ── 7. Merk: profiel, bootmenu, splash ────────────────────────────

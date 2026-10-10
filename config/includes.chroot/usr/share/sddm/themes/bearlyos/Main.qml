@@ -111,7 +111,20 @@ Rectangle {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             color: "#8a8a95"; font.pixelSize: 14
-            text: root.userName.length > 0 ? root.userName : "gebruiker"
+            visible: root.userName.length > 0
+            text: root.userName
+        }
+        TextInput {
+            id: userInput
+            visible: root.userName.length === 0
+            anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: TextInput.AlignHCenter
+            width: 200
+            color: "#f4f4f6"; font.pixelSize: 14
+            text: "bear"
+            selectByMouse: true
+            KeyNavigation.tab: pw
+            onAccepted: pw.forceActiveFocus()
         }
 
         Rectangle {
@@ -155,7 +168,7 @@ Rectangle {
 
     function doLogin() {
         msg.text = "";
-        var u = root.userName.length > 0 ? root.userName : "";
+        var u = root.userName.length > 0 ? root.userName : userInput.text;
         sddm.login(u, pw.text, sessionModel.lastIndex);
     }
 

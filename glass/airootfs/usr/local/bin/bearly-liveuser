@@ -1,15 +1,19 @@
 #!/bin/sh
-# Maakt de live-gebruiker 'bear' aan in de live-ISO (niet op een
-# geinstalleerd systeem; daar maakt de installer de gebruiker aan).
+# Live-sessie: gebruiker 'bear' staat al in het image (passwd/shadow);
+# hier alleen home-map en sudo-regel regelen. Niet op een geinstalleerd systeem.
 set -e
-if ! id bear >/dev/null 2>&1; then
-    useradd -m -G wheel -s /bin/bash bear
-    passwd -d bear            # leeg wachtwoord voor de live-sessie
-    # extra groepen toevoegen als ze bestaan (faalt niet als er een mist)
-    for g in video audio input network storage power; do
-        getent group "$g" >/dev/null 2>&1 && usermod -aG "$g" bear || true
-    done
+if id bear >/dev/null 2>&1; then
+    if [ ! -d /home/bear ]; then
+        mkdir -p /home/bear
+        cp -a /etc/skel/. /home/bear/
+    fi
+    chown -R bear:bear /home/bear
+else
+    useradd -m -G wheel -s /bin/bash bear && passwd -d bear
 fi
-# wheel-groep sudo zonder wachtwoord in de live-sessie
+passwd -d bear >/dev/null 2>&1 || true
+for g in video audio input network storage power; do
+    getent group "$g" >/dev/null 2>&1 && usermod -aG "$g" bear || true
+done
 echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/10-bearly-live
 chmod 0440 /etc/sudoers.d/10-bearly-live
